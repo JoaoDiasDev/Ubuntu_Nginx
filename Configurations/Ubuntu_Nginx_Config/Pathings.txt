@@ -1,0 +1,5 @@
+/*  Nginx Web Server Sites Pathing  */
+    /usr/share/nginx/nginx1.joaodiasdev.com
+
+    sudo cp -a /tmp/wordpress/. /usr/share/nginx/nginx1.joaodiasdev.com
+    sudo cp -a /tmp/wordpress/. /usr/share/nginx/nginx2.fruithome.com.br

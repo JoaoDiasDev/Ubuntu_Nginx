@@ -1,0 +1,91 @@
+Ip droplet
+    69.55.49.59
+
+Initial config 
+    adduser joaodias
+    usermod -aG sudo joaodias
+
+    ufw allow OpenSSH
+    sudo ufw allow 'Nginx Full'
+    sudo ufw allow 80
+    sudo ufw allow 443
+    ufw enable
+    ufw status
+
+    rsync --archive --chown=joaodias:joaodias ~/.ssh /home/joaodias
+
+Install NGinx
+    sudo apt update && sudo apt install nginx
+    sudo service nginx status
+
+Directory Creating
+    sudo mkdir -p /var/www/joaodiasdev.com/public_html
+    sudo mkdir -p /var/www/fruithome.com.br/public_html
+
+    sudo chown -R $(whoami):$(whoami) /var/www/joaodiasdev.com/public_html
+    sudo chown -R $(whoami):$(whoami) /var/www/fruithome.com.br/public_html
+
+    sudo chown -R $USER:$USER /var/www/joaodiasdev.com/
+    sudo chown -R $USER:$USER /var/www/fruithome.com.br/
+
+
+    sudo chmod -R 755 /var/www
+    sudo chmod -R 755 /var/www/joaodiasdev.com/public_html
+    sudo chmod -R 755 /var/www/fruithome.com.br/public_html
+
+    sudo chown -R www-data:www-data /var/www/joaodiasdev.com/public_html
+    sudo chown -R www-data:www-data /var/www/fruithome.com.br/public_html
+
+    sudo echo "Welcome to mytest1.com!" > /var/www/joaodiasdev.com/public_html/index.html
+    sudo echo "Welcome to mytest2.com!" > /var/www/fruithome.com.br/public_html/index.html
+
+Create Server Block
+    sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/joaodiasdev.com
+    sudo nano /etc/nginx/sites-available/joaodiasdev.com
+        listen 80;
+        listen [::]:80;
+        root /var/www/joaodiasdev.com/public_html;
+        server_name joaodiasdev.com www.joaodiasdev.com;
+    sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/fruithome.com.br
+    sudo nano /etc/nginx/sites-available/fruithome.com.br
+        listen 80;
+        listen [::]:80;
+        root /var/www/fruithome.com.br/public_html;
+        server_name fruithome.com.br www.fruithome.com.br;
+
+        sudo nginx -t
+
+Create Symbolic Links
+    sudo ln -s /etc/nginx/sites-available/joaodiasdev.com /etc/nginx/sites-enabled/
+    sudo ln -s /etc/nginx/sites-available/fruithome.com.br  /etc/nginx/sites-enabled/
+
+    sudo rm /etc/nginx/sites-enabled/default
+
+    sudo service nginx restart
+
+CertBot SSL
+    sudo snap install core; sudo snap refresh core
+
+    sudo apt-get remove certbot
+
+    sudo snap install --classic certbot
+    sudo ln -s /snap/bin/certbot /usr/bin/certbot
+    sudo certbot --nginx
+
+    sudo certbot renew --dry-run
+
+    https://www.ssllabs.com/ssltest/analyze.html?d=joaodiasdev.com
+
+Nginx extra config
+    sudo nano /etc/nginx/nginx.conf
+        # set client body size to 2M #
+        client_max_body_size 2M;
+
+    sudo systemctl reload nginx.service
+
+Php config
+    sudo nano /var/www/joaodiasdev.com/public_html/wordpress/php.ini
+    sudo nano /var/www/fruithome.com.br/public_html/wordpress/php.ini
+        upload_max_filesize = 200M
+	post_max_size = 200M
+	memory_limit = 200M

@@ -1,0 +1,43 @@
+
+CREATE DATABASE fruitwordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+
+CREATE USER 'joaodias'@'localhost' IDENTIFIED BY 'kotehazur321*';
+
+GRANT ALL ON fruitwordpress.* TO 'joaodias'@'localhost';
+
+CREATE USER 'joaodiasfruit'@'localhost' IDENTIFIED BY 'kotehazur321*';
+
+GRANT ALL ON fruitwordpress.* TO 'joaodiasfruit'@'localhost';
+
+
+sudo chown -R www-data:www-data /usr/share/nginx/nginx1.joaodiasdev.com
+sudo chown -R www-data:www-data /usr/share/nginx/nginx2.fruithome.com.br
+
+
+
+sudo cp -a /tmp/wordpress/. /usr/share/nginx/nginx1.joaodiasdev.com
+
+sudo cp -a /tmp/wordpress/. /usr/share/nginx/nginx2.fruithome.com.br
+
+sudo nano /usr/share/nginx/nginx1.joaodiasdev.com/wp-config.php
+
+sudo nano /usr/share/nginx/nginx2.fruithome.com.br/wp-config.php
+
+
+
+curl -s https://api.wordpress.org/secret-key/1.1/salt/
+
+define('AUTH_KEY',         '~7 *Nsk@-[LffR<W)c~i3)tT@y?d#h1N}f!4BL{:,.@W V6O#K.C*+rfq|_Jx*[6');
+define('SECURE_AUTH_KEY',  'E5e1?|2!]:+]qA]0,tgYa[l(|4`?}j|I<j_N{~?,Wzes22+u((.kt?+7Fp o]@=W');
+define('LOGGED_IN_KEY',    '{P+3WH!I*8B*uJ@|G7G.g-9;@5Pzf=aOM21+CJ:PCLH};VkW1rZ,+luP-I]^piQ|');
+define('NONCE_KEY',        'p<B+}~QL@c&k= pu],Q6 v3FH]Vs+jS |3V69cCVJ`|UMZ**Uxh*d&:OYCNuRXH%');
+define('AUTH_SALT',        '-OYQ|=o!BW!}9$^bqWN2P/@n9(A-T@4aRYeN5Yr<~4ia0TfpOCcb?1Gbow[^$BHK');
+define('SECURE_AUTH_SALT', 'IaTv<CiVJzH?u]jrLzWIW3b+WO]%/I`*Q+;WBGew^H,c:89)!T>5>En(yq%5;l8&');
+define('LOGGED_IN_SALT',   'l-]_gfRO_xgw|tE7).=/AK.Y;ML<!)J=YHKOy?-WWn]G6t1=ABpW--XvSWQDQIPR');
+define('NONCE_SALT',       '-wj!J,^7V^|#jlt&$>S!a]|i(.S6z(-Z-}jh+`:M!c]3|dlFiS,OO}+DnUb.sxc;');
+
+
+
+
+define( 'FS_METHOD', 'direct' );

@@ -1,0 +1,230 @@
+
+sudo mkdir -v /var/www/apache1.joaodiasdev.com /var/www/apache2.fruithome.com.br
+
+
+echo "<h1 style='color: green;'>Apache 1</h1>" | sudo tee /var/www/apache1.joaodiasdev.com/index.html
+echo "<h1 style='color: red;'>Apache 2</h1>" | sudo tee /var/www/apache2.fruithome.com.br/index.html
+
+echo "<?php phpinfo(); ?>" | sudo tee /var/www/apache1.joaodiasdev.com/info.php
+echo "<?php phpinfo(); ?>" | sudo tee /var/www/apache2.fruithome.com.br/info.php
+
+
+sudo nano /etc/apache2/sites-available/apache1.joaodiasdev.com.conf
+    <VirtualHost *:8080>
+        ServerName apache1.joaodiasdev.com
+        ServerAlias www.apache1.joaodiasdev.com
+        DocumentRoot /var/www/apache1.joaodiasdev.com
+        <Directory /var/www/apache1.joaodiasdev.com>
+            AllowOverride All
+        </Directory>
+    </VirtualHost>
+
+sudo nano /etc/apache2/sites-available/apache2.fruithome.com.br.conf
+    <VirtualHost *:8080>
+        ServerName apache2.fruithome.com.br
+        ServerAlias www.apache2.fruithome.com.br
+        DocumentRoot /var/www/apache2.fruithome.com.br
+        <Directory /var/www/apache2.fruithome.com.br>
+            AllowOverride All
+        </Directory>
+    </VirtualHost>
+
+sudo a2ensite apache1.joaodiasdev.com
+sudo a2ensite apache2.fruithome.com.br
+
+
+sudo nano /etc/apache2/apache2.conf
+
+sudo mkdir -v /usr/share/nginx/nginx1.joaodiasdev.com /usr/share/nginx/nginx2.fruithome.com.br
+
+echo "<h1 style='color: green;'>Nginx 1</h1>" | sudo tee /usr/share/nginx/nginx1.joaodiasdev.com/index.html
+echo "<h1 style='color: red;'>Nginx 2</h1>" | sudo tee /usr/share/nginx/nginx2.fruithome.com.br/index.html
+echo "<?php phpinfo(); ?>" | sudo tee /usr/share/nginx/nginx1.joaodiasdev.com/info.php
+echo "<?php phpinfo(); ?>" | sudo tee /usr/share/nginx/nginx2.fruithome.com.br/info.php
+
+sudo nano /etc/nginx/sites-available/nginx1.joaodiasdev.com
+    server {
+        listen 80 default_server;
+
+        root /usr/share/nginx/nginx1.joaodiasdev.com;
+        index index.php index.html index.htm;
+
+        server_name nginx1.joaodiasdev.com www.nginx1.joaodiasdev.com;
+        location / {
+            try_files $uri $uri/ /index.php;
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+            include snippets/fastcgi-php.conf;
+        }
+    }
+
+sudo nano /etc/nginx/sites-available/nginx2.fruithome.com.br
+    server {
+        root /usr/share/nginx/nginx2.fruithome.com.br;
+        index index.php index.html index.htm;
+
+        server_name nginx2.fruithome.com.br www.nginx2.fruithome.com.br;
+        location / {
+            try_files $uri $uri/ /index.php;
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+            include snippets/fastcgi-php.conf;
+        }
+    }
+
+sudo ln -s /etc/nginx/sites-available/nginx1.joaodiasdev.com /etc/nginx/sites-enabled/nginx1.joaodiasdev.com
+sudo ln -s /etc/nginx/sites-available/nginx2.fruithome.com.br /etc/nginx/sites-enabled/nginx2.fruithome.com.br
+
+sudo nano /etc/nginx/sites-available/apache
+    server {
+        listen 80;
+        server_name apache1.joaodiasdev.com www.apache1.joaodiasdev.com apache2.fruithome.com.br www.apache2.fruithome.com.br;
+
+        location / {
+            proxy_pass http://167.172.142.10:8080;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+
+sudo ln -s /etc/nginx/sites-available/apache /etc/nginx/sites-enabled/apache
+
+sudo nginx -t
+
+sudo systemctl reload nginx
+
+sudo apt install unzip build-essential apache2-dev
+
+wget https://github.com/gnif/mod_rpaf/archive/stable.zip
+
+unzip stable.zip
+
+cd mod_rpaf-stable
+
+make
+sudo make install
+
+sudo nano /etc/apache2/mods-available/rpaf.load
+    LoadModule rpaf_module /usr/lib/apache2/modules/mod_rpaf.so
+
+sudo nano /etc/apache2/mods-available/rpaf.conf
+    <IfModule mod_rpaf.c>
+    RPAF_Enable             On
+    RPAF_Header             X-Real-Ip
+    RPAF_ProxyIPs           167.172.142.10
+    RPAF_SetHostName        On
+    RPAF_SetHTTPS           On
+    RPAF_SetPort            On
+</IfModule>
+
+sudo a2enmod rpaf
+
+sudo apachectl -t
+
+sudo systemctl reload apache2
+
+sudo nano /etc/nginx/sites-available/apache
+
+    server {
+        listen 80;
+        server_name apache1.joaodiasdev.com www.apache1.joaodiasdev.com;
+
+        location / {
+            proxy_pass http://167.172.142.10:8080;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+    server {
+        listen 80;
+        server_name apache2.fruithome.com.br www.apache2.fruithome.com.br;
+
+        location / {
+            proxy_pass http://167.172.142.10:8080;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+
+sudo snap install --classic certbot
+
+sudo certbot --agree-tos --no-eff-email --email joaodiasworking@gmail.com --nginx -d apache1.joaodiasdev.com -d www.apache1.joaodiasdev.com
+sudo certbot --agree-tos --no-eff-email --email joaodiasworking@gmail.com --nginx -d joaodiasdev.com -d www.joaodiasdev.com
+
+sudo certbot --agree-tos --no-eff-email --email joaodiasworking@gmail.com --nginx -d apache2.fruithome.com.br -d www.apache2.fruithome.com.br
+sudo certbot --agree-tos --no-eff-email --email joaodiasworking@gmail.com --nginx -d fruithome.com.br -d www.fruithome.com.br
+
+sudo iptables -I INPUT -p tcp --dport 8080 ! -s 167.172.142.10 -j REJECT --reject-with tcp-reset //Test IPTABLE
+
+sudo nano /etc/nginx/sites-available/apache
+    server {
+    listen 80;
+    server_name apache1.joaodiasdev.com www.apache1.joaodiasdev.com;
+    root /var/www/apache1.joaodiasdev.com;
+    index index.php index.htm index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+
+    location ~ \.php$ {
+        proxy_pass http://167.172.142.10:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/apache1.joaodiasdev.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/apache1.joaodiasdev.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+server {
+    listen 80;
+    server_name apache2.fruithome.com.br www.apache2.fruithome.com.br;
+    root /var/www/apache2.fruithome.com.br;
+    index index.php index.htm index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+
+    location ~ \.php$ {
+        proxy_pass http://167.172.142.10:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/apache2.fruithome.com.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/apache2.fruithome.com.br/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+
+
+sudo iptables -I INPUT -p tcp --dport 8080 ! -s 167.172.142.10 -j REJECT --reject-with tcp-reset

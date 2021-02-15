@@ -1,0 +1,2 @@
+Copy Files Inside a folder to another
+    cp -a /source/. /dest/

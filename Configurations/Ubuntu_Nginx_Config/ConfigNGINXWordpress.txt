@@ -1,0 +1,121 @@
+Install Base
+    sudo apt update
+    sudo apt install nginx mariadb-server mariadb-client php-fpm php-mysql
+    sudo apt install php7.4-common php7.4-mbstring php7.4-xmlrpc php7.4-soap php7.4-gd php7.4-xml php7.4-intl php7.4-mysql php7.4-cli php7.4-ldap php7.4-zip php7.4-curl php-fpm
+
+Install Mysql
+    sudo mysql_secure_installation
+    sudo mysql
+    CREATE DATABASE wordpress_joaodiasdev;
+    CREATE DATABASE wordpress_fruithome;
+    CREATE USER 'wordpress_joaodiasdev'@'localhost' IDENTIFIED BY 'kotehazur321*';
+    GRANT ALL PRIVILEGES ON wordpress_joaodiasdev.* to wordpress_joaodiasdev@'localhost';
+    GRANT ALL PRIVILEGES ON wordpress_fruithome.* to wordpress_joaodiasdev@'localhost';
+    FLUSH PRIVILEGES;
+    exit
+
+Download Install Wordpress
+     cd /tmp/
+     wget -c https://wordpress.org/latest.tar.gz
+     tar -xvzf latest.tar.gz
+     sudo mv wordpress/ /var/www/joaodiasdev.com/public_html/
+     tar -xvzf latest.tar.gz
+     sudo mv wordpress/ /var/www/fruithome.com.br/public_html/
+     sudo chown -R www-data:www-data /var/www/joaodiasdev.com/public_html/wordpress/
+     sudo chown -R www-data:www-data /var/www/fruithome.com.br/public_html/wordpress/
+     sudo chmod 755 -R /var/www/joaodiasdev.com/public_html/wordpress/
+     sudo chmod 755 -R /var/www/fruithome.com.br/public_html/wordpress/
+
+     sudo nano /etc/nginx/sites-available/joaodiasdev.com
+
+      server {
+                server_name joaodiasdev.com www.joaodiasdev.com;
+                root /var/www/joaodiasdev.com/public_html/wordpress;
+                index index.php;
+                location / {
+                try_files $uri $uri/ /index.php$is_args$args;
+                }
+                location ~ .php$ {
+                fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+                fastcgi_index index.php;
+                include /etc/nginx/fastcgi_params;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                include fastcgi_params;
+                fastcgi_param SERVER_NAME $host;
+                }
+                location ~ /files{
+                deny all;
+                }
+                listen [::]:443 ssl; # managed by Certbot
+                listen 443 ssl; # managed by Certbot
+                ssl_certificate /etc/letsencrypt/live/fruithome.com.br/fullchain.pem; #managed by Certbot
+                ssl_certificate_key /etc/letsencrypt/live/fruithome.com.br/privkey.pem; #managed by Certbot
+                include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+                ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; #managed by Certbot
+
+            }
+        server{
+                if ($host = www.joaodiasdev.com){
+                    return 301 https://$host$request_uri;
+                } # managed by Certbot
+
+                if ($host = joaodiasdev.com){
+                    return 301 https://$host$request_uri;
+                } # managed by Certbot
+
+
+                    listen 80;
+                    listen [::]:80;
+
+                    server_name joaodiasdev.com www.joaodiasdev.com;
+            }    
+
+     sudo nano /etc/nginx/sites-available/fruithome.com.br
+     
+        server {
+                server_name fruithome.com.br www.fruithome.com.br;
+                root /var/www/fruithome.com.br/public_html/wordpress;
+                index index.php;
+                location / {
+                try_files $uri $uri/ /index.php$is_args$args;
+                }
+                location ~ .php$ {
+                fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+                fastcgi_index index.php;
+                include /etc/nginx/fastcgi_params;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                include fastcgi_params;
+                fastcgi_param SERVER_NAME $host;
+                }
+                location ~ /files{
+                deny all;
+                }
+                listen [::]:443 ssl; # managed by Certbot
+                listen 443 ssl; # managed by Certbot
+                ssl_certificate /etc/letsencrypt/live/fruithome.com.br/fullchain.pem; #managed by Certbot
+                ssl_certificate_key /etc/letsencrypt/live/fruithome.com.br/privkey.pem; #managed by Certbot
+                include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+                ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; #managed by Certbot
+
+            }
+        server{
+                if ($host = www.fruithome.com.br){
+                    return 301 https://$host$request_uri;
+                } # managed by Certbot
+
+                if ($host = fruithome.com.br){
+                    return 301 https://$host$request_uri;
+                } # managed by Certbot
+
+
+                    listen 80;
+                    listen [::]:80;
+
+                    server_name fruithome.com.br www.fruithome.com.br;
+            }    
+
+sudo systemctl restart nginx
+
+sudo systemctl reload php7.4-fpm.service
+ 
+define( 'FS_METHOD', 'direct' );

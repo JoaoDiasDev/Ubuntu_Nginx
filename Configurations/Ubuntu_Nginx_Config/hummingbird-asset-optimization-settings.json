@@ -1,0 +1,72 @@
+{
+    "version": "2.7.0",
+    "plugins": [
+        "akismet\/akismet.php",
+        "astra-sites\/astra-sites.php",
+        "elementor-pro\/elementor-pro.php",
+        "elementor\/elementor.php",
+        "elementskit-lite\/elementskit-lite.php",
+        "essential-addons-elementor\/essential_adons_elementor.php",
+        "essential-addons-for-elementor-lite\/essential_adons_elementor.php",
+        "header-footer-elementor\/header-footer-elementor.php",
+        "hello.php",
+        "hummingbird-performance\/wp-hummingbird.php",
+        "jetpack\/jetpack.php",
+        "pretty-link\/pretty-link.php",
+        "woo-checkout-field-editor-pro\/checkout-form-designer.php",
+        "woocommerce-customizer\/woocommerce-customizer.php",
+        "woocommerce\/woocommerce.php",
+        "wordfence\/wordfence.php",
+        "wordpress-seo\/wp-seo.php",
+        "wp-smushit\/wp-smush.php"
+    ],
+    "network_plugins": false,
+    "theme": "twentytwenty",
+    "settings": {
+        "minify": {
+            "enabled": true,
+            "use_cdn": false,
+            "log": false,
+            "file_path": "",
+            "minify_blog": true,
+            "view": "basic",
+            "type": "speedy",
+            "do_assets": {
+                "styles": true,
+                "scripts": true
+            },
+            "block": {
+                "scripts": [],
+                "styles": []
+            },
+            "dont_minify": {
+                "scripts": [],
+                "styles": [
+                    "google-fonts-1"
+                ]
+            },
+            "dont_combine": {
+                "scripts": [],
+                "styles": [
+                    "google-fonts-1"
+                ]
+            },
+            "position": {
+                "scripts": [],
+                "styles": []
+            },
+            "defer": {
+                "scripts": [],
+                "styles": []
+            },
+            "inline": {
+                "scripts": [],
+                "styles": []
+            },
+            "nocdn": {
+                "scripts": [],
+                "styles": []
+            }
+        }
+    }
+}
